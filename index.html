@@ -65,7 +65,7 @@
                 var selection = Rx.Observable
                     .fromEvent(document.getElementById('grid'), 'select')
                     .map(function(e) { return e.target.selectedRow; })
-                    .filter(function(rowIndex) { return rowIndex > 0; })
+                    .filter(function(rowIndex) { return rowIndex >= 0; })
                     .map(function(rowIndex) { console.log(rowIndex); return rowCache[rowIndex]; });
 
                 selection.subscribe(function(item) {
