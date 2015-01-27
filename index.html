@@ -35,6 +35,7 @@
 
                 // Update data source when new search initialized.
                 searchInit.subscribe(function(response) {
+                    rowCache = [];  // Empty cache.
                     var grid = document.getElementById('grid');
                     grid.rowCount = response.numFound;
                     grid.dataSource = function(index, count, callback) {
@@ -60,10 +61,16 @@
                     window.alert("Something went wrong, could not contact the server.");
                 });
 
-                // Wire up select listener.
-                document.getElementById('grid').addEventListener('select', function() {
-                    var selectedItem = rowCache[this.selectedRow];
-                    // console.log(selectedItem);
+                // Wire up selection.
+                var selection = Rx.Observable
+                    .fromEvent(document.getElementById('grid'), 'select')
+                    .map(function(e) { return e.target.selectedRow; })
+                    .filter(function(rowIndex) { return rowIndex > 0; })
+                    .map(function(rowIndex) { console.log(rowIndex); return rowCache[rowIndex]; });
+
+                selection.subscribe(function(item) {
+                    // TODO Handle selection.
+                    // console.log(item);
                 });
 
                 // Focus the search field.
