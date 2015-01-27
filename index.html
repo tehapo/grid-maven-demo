@@ -1,0 +1,80 @@
+<html>
+    <head>
+        <title>Grid Maven Demo</title>
+        <link rel="import" href="bower_components/vaadin-components/vaadin-components.html" />
+        <script src="bower_components/vaadin-components/Object.observe.poly.js"></script>
+        <script src="bower_components/webcomponentsjs/webcomponents.js"></script>
+        <script type="text/javascript" src="bower_components/rxjs/dist/rx.all.min.js"></script>
+        <script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
+
+        <script type="text/javascript">
+            window.addEventListener("load", function() {
+                'use strict';
+
+                function getUrl(searchString, start, rows) {
+                    var url = 'http://' + window.location.hostname + ':8888?q=' + searchString;
+                    url += '&start=' + start;
+                    url += '&rows=' + rows;
+                    return url;
+                }
+
+                // Keyup -> input value -> throttle -> url -> JSON -> response.
+                var searchInit = Rx.Observable
+                    .fromEvent(document.getElementById('search'), 'keyup')
+                    .map(function(e) { return e.target.value; })
+                    .throttleWithTimeout(500)
+                    .map(function(s) { return getUrl(s, 0, 0); })
+                    .flatMap(function(url) {
+                        return Rx.Observable.fromPromise($.getJSON(url));
+                    })
+                    .map(function(responseObj) {
+                        return responseObj.response;
+                    });
+
+                // Update data source when new search initialized.
+                searchInit.subscribe(function(response) {
+                    var grid = document.getElementById('grid');
+                    grid.rowCount = response.numFound;
+                    grid.dataSource = function(index, count, callback) {
+                        $.getJSON(getUrl($("#search").val(), index, count), function(data) {
+                            // Map the items to data needed for the grid.
+                            callback(data.response.docs.map(function(item) {
+                                var updatedStamp = new Date(item.timestamp);
+                                return {
+                                    groupId: item.g,
+                                    artifactId: item.a,
+                                    latestVersion: item.latestVersion,
+                                    updated: updatedStamp.toLocaleDateString()
+                                };
+                            }));
+                        });
+                    };
+                });
+            });
+        </script>
+        <style type="text/css">
+            .v-grid {
+                width: 100% !important;
+                height: 100% !important;
+            }
+        </style>
+    </head>
+    <body class="valo v-app">
+        <input type="text" id="search" class="v-textfield" />
+
+        <v-grid theme="valo" id="grid" style="width: 1000px">
+            <table>
+                <thead>
+                    <tr>
+                        <th>groupId</th>
+                        <th>artifactId</th>
+                        <th>latestVersion</th>
+                        <th>updated</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </v-grid>
+    </body>
+</html>
