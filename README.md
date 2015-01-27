@@ -1,7 +1,7 @@
 Grid Maven Demo
 ===============
 
-Simple example of using <v-grid> from Vaadin Components package to provide a search interface for search.maven.org API.
+Simple example of using &lt;v-grid&gt; from Vaadin Components package to provide a search interface for search.maven.org API.
 
 ### Install dependencies
 
