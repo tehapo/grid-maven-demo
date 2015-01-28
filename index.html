@@ -1,6 +1,8 @@
 <html>
     <head>
         <title>Grid Maven Demo</title>
+
+        <!-- Dependencies -->
         <link rel="import" href="bower_components/vaadin-components/vaadin-components.html" />
         <script src="bower_components/vaadin-components/Object.observe.poly.js"></script>
         <script src="bower_components/webcomponentsjs/webcomponents.js"></script>
@@ -8,141 +10,9 @@
         <script type="text/javascript" src="bower_components/jquery/dist/jquery.min.js"></script>
         <script type="text/javascript" src="bower_components/zeroclipboard/dist/ZeroClipboard.min.js"></script>
 
-        <script type="text/javascript">
-            window.addEventListener("load", function() {
-                'use strict';
-
-                var rowCache = [];
-                var zeroClipboard = new ZeroClipboard();
-                function getUrl(searchString, start, rows) {
-                    var url = 'http://' + window.location.hostname + ':8888?q=' + searchString;
-                    url += '&start=' + start;
-                    url += '&rows=' + rows;
-                    return url;
-                }
-
-                function getPomText(data) {
-                    var pom = '&lt;dependency&gt;';
-                    pom += '&lt;groupId&gt;' + data.groupId + '&lt;/groupId&gt';
-                    pom += '&lt;artifactId&gt;' + data.artifactId + '&lt;/artifactId&gt';
-                    pom += '&lt;version&gt;' + data.latestVersion + '&lt;/version&gt';
-                    pom += '&lt;/dependency&gt';
-                    return pom;
-                }
-
-                // Keyup -> input value -> throttle -> url -> JSON request -> response.
-                var searchInit = Rx.Observable
-                    .fromEvent(document.getElementById('search'), 'keyup')
-                    .map(function(e) { return e.target.value; })
-                    .filter(function(val) { return val.length > 1; })
-                    .throttleWithTimeout(500)
-                    .map(function(s) { return getUrl(s, 0, 0); })
-                    .flatMap(function(url) {
-                        return Rx.Observable.fromPromise($.getJSON(url));
-                    })
-                    .map(function(responseObj) {
-                        return responseObj.response;
-                    });
-
-                // Update data source when new search initialized.
-                searchInit.subscribe(function(response) {
-                    rowCache = [];  // Empty cache.
-                    var grid = document.getElementById('grid');
-                    grid.rowCount = response.numFound;
-                    grid.columns[grid.columns.length - 1].renderer = function(element, x, data) {
-                        element.innerHTML = '<img src="img/clipboard.png" title="Copy to clipboard" data-clipboard-text="' + getPomText(data) + '" />';
-
-                        // Hook ZeroClipboard to
-                        var img = element.querySelector('img');
-                        zeroClipboard.clip(img);
-                        zeroClipboard.on('copy', function(event) {
-                            $('#status').html('Copied to clipboard').addClass('display');
-                            window.setTimeout(function() {
-                                $('#status').removeClass('display');
-                            }, 2000);
-                        });
-                    };
-                    grid.dataSource = function(index, count, callback) {
-                        $.getJSON(getUrl($("#search").val(), index, count), function(data) {
-                            // Map the items to data needed for the grid.
-                            var currentPage = data.response.docs.map(function(item) {
-                                var updatedStamp = new Date(item.timestamp);
-                                return {
-                                    groupId: item.g,
-                                    artifactId: item.a,
-                                    latestVersion: item.latestVersion,
-                                    updated: updatedStamp.toLocaleDateString()
-                                };
-                            });
-                            // Copy the items to cache.
-                            for (var i = index; i < index + currentPage.length; i++) {
-                                rowCache[i] = currentPage[i - index];
-                            }
-                            callback(currentPage);
-                        });
-                    };
-                }, function(err) {
-                    window.alert("Something went wrong, could not contact the server.");
-                });
-
-                // Wire up selection.
-                // TODO remove if not needed.
-                var selection = Rx.Observable
-                    .fromEvent(document.getElementById('grid'), 'select')
-                    .map(function(e) { return e.target.selectedRow; })
-                    .filter(function(rowIndex) { return rowIndex >= 0; })
-                    .map(function(rowIndex) { return rowCache[rowIndex]; });
-
-                // Focus the search field.
-                document.getElementById('search').focus();
-            });
-        </script>
-        <style type="text/css">
-            .v-grid {
-                width: 100% !important;
-                height: 90% !important;
-            }
-            .v-grid img {
-                height: 28px;
-                width: 21px;
-                opacity: 0.8;
-                cursor: pointer;
-                transition: all 100ms;
-            }
-            .v-grid img.zeroclipboard-is-hover {
-                opacity: 1;
-                transform: scale(1.2) rotate(4deg);
-            }
-            .v-grid img.zeroclipboard-is-active {
-                opacity: 1;
-                transform: scale(0.8) rotate(-4deg);
-            }
-            .v-grid td:last-child,
-            .v-grid th:last-child {
-                text-align: center;
-            }
-            .v-textfield {
-                width: 100% !important;
-                margin-bottom: 10px !important;
-            }
-            #status {
-                position: absolute;
-                top: 20px;
-                right: 20px;
-                background: rgba(0,0,0,0.7);
-                color: #fff;
-                padding: 20px;
-                z-index: 9999;
-                border-radius: 2px;
-                opacity: 0;
-                transition: all 200ms;
-                transform: translateX(130%);
-            }
-            #status.display {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        </style>
+        <!-- App -->
+        <link rel="stylesheet" href="styles.css" />
+        <script type="text/javascript" src="app.js"></script>
     </head>
     <body class="valo v-app">
         <input type="text" id="search" class="v-textfield" placeholder="Search for Maven packages..." />
