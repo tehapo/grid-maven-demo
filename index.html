@@ -103,10 +103,19 @@
                 height: 90% !important;
             }
             .v-grid img {
-                height: 100%;
-                padding: 6px;
-                box-sizing: border-box;
+                height: 28px;
+                width: 21px;
+                opacity: 0.8;
                 cursor: pointer;
+                transition: all 100ms;
+            }
+            .v-grid img.zeroclipboard-is-hover {
+                opacity: 1;
+                transform: scale(1.2) rotate(4deg);
+            }
+            .v-grid img.zeroclipboard-is-active {
+                opacity: 1;
+                transform: scale(0.8) rotate(-4deg);
             }
             .v-grid td:last-child,
             .v-grid th:last-child {
@@ -126,8 +135,8 @@
                 z-index: 9999;
                 border-radius: 2px;
                 opacity: 0;
-                transition: all 400ms;
-                transform: translateX(150%);
+                transition: all 200ms;
+                transform: translateX(130%);
             }
             #status.display {
                 opacity: 1;
