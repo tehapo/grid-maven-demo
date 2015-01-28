@@ -13,6 +13,7 @@
                 'use strict';
 
                 var rowCache = [];
+                var zeroClipboard = new ZeroClipboard();
                 function getUrl(searchString, start, rows) {
                     var url = 'http://' + window.location.hostname + ':8888?q=' + searchString;
                     url += '&start=' + start;
@@ -53,8 +54,8 @@
 
                         // Hook ZeroClipboard to
                         var img = element.querySelector('img');
-                        var zc = new ZeroClipboard(img);
-                        zc.on('copy', function(event) {
+                        zeroClipboard.clip(img);
+                        zeroClipboard.on('copy', function(event) {
                             $('#status').html('Copied to clipboard').addClass('display');
                             window.setTimeout(function() {
                                 $('#status').removeClass('display');
