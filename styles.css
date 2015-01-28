@@ -17,6 +17,22 @@
     opacity: 1;
     transform: scale(0.8) rotate(-4deg);
 }
+.v-grid td.new {
+    position: relative;
+}
+.v-grid td.new:after {
+    content: "new";
+    position: absolute;
+    top: 0;
+    right: 0;
+    color: #fff;
+    background: #f00;
+    background: linear-gradient(90deg, #f00, #a00);
+    transform: rotate(45deg);
+    width: 100px;
+    font-size: 90%;
+    text-align: center;
+}
 .v-grid td:last-child,
 .v-grid th:last-child {
     text-align: center;
@@ -36,9 +52,11 @@
     border-radius: 2px;
     opacity: 0;
     transition: all 200ms;
+    -moz-transform: translateX(130%);
     transform: translateX(130%);
 }
 #status.display {
     opacity: 1;
-    transform: translateX(0);
+    -moz-transform: translateX(0%);
+    transform: translateX(0%);
 }

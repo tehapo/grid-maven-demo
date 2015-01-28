@@ -38,7 +38,7 @@ window.addEventListener("load", function() {
         rowCache = [];  // Empty cache.
         var grid = document.getElementById('grid');
         grid.rowCount = response.numFound;
-        grid.columns[grid.columns.length - 1].renderer = function(element, x, data) {
+        grid.columns[4].renderer = function(element, x, data) {
             element.innerHTML = '<img src="img/clipboard.png" title="Copy to clipboard" data-clipboard-text="' + getPomText(data) + '" />';
 
             // Hook ZeroClipboard to
@@ -51,16 +51,23 @@ window.addEventListener("load", function() {
                 }, 2000);
             });
         };
+        grid.columns[3].renderer = function(element, x, data) {
+            if (new Date().getTime() - data.updated < 1000 * 60 * 60 * 24 * 30) {
+                $(element).addClass("new");
+            } else {
+                $(element).removeClass("new");
+            }
+            element.innerHTML = new Date(data.updated).toLocaleDateString();
+        };
         grid.dataSource = function(index, count, callback) {
             $.getJSON(getUrl($("#search").val(), index, count), function(data) {
                 // Map the items to data needed for the grid.
                 var currentPage = data.response.docs.map(function(item) {
-                    var updatedStamp = new Date(item.timestamp);
                     return {
                         groupId: item.g,
                         artifactId: item.a,
                         latestVersion: item.latestVersion,
-                        updated: updatedStamp.toLocaleDateString()
+                        updated: item.timestamp
                     };
                 });
                 // Copy the items to cache.
