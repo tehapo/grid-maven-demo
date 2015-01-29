@@ -31,8 +31,9 @@ window.addEventListener("load", function() {
         },
 
         clipboard: function(element, x, data) {
-            $(element).addClass('clipboard');
-            element.innerHTML = '<img src="img/clipboard.png" title="Copy to clipboard" data-clipboard-text="' + getPomText(data) + '" />';
+            $(element)
+                    .addClass('clipboard')
+                    .html('<img src="img/clipboard.png" title="Copy to clipboard" data-clipboard-text="' + getPomText(data) + '" />');
 
             // Hook ZeroClipboard.
             var img = element.querySelector('img');
@@ -43,6 +44,14 @@ window.addEventListener("load", function() {
                     $('#status').removeClass('display');
                 }, 2000);
             });
+        },
+
+        javadoc: function(element, x, data) {
+            if (data.javadoc) {
+                $(element)
+                        .addClass('javadoc')
+                        .html('<a href="http://demo.vaadin.com/javadoc/' + data.groupId + '/' + data.artifactId + '/' + data.latestVersion + '/">Javadoc</a>');
+            }
         }
 
     };
@@ -72,8 +81,9 @@ window.addEventListener("load", function() {
         rowCache = [];  // Empty cache.
         var grid = document.getElementById('grid');
         grid.rowCount = response.numFound;
-        grid.columns[4].renderer = renderers.clipboard;
         grid.columns[3].renderer = renderers.updated;
+        grid.columns[4].renderer = renderers.clipboard;
+        grid.columns[5].renderer = renderers.javadoc;
         grid.dataSource = function(index, count, callback) {
             $.getJSON(getUrl($("#search").val(), index, count), function(data) {
                 // Map the items to data needed for the grid.
@@ -82,7 +92,8 @@ window.addEventListener("load", function() {
                         groupId: item.g,
                         artifactId: item.a,
                         latestVersion: item.latestVersion,
-                        updated: item.timestamp
+                        updated: item.timestamp,
+                        javadoc: (item.text.indexOf('-javadoc.jar') !== -1)
                     };
                 });
                 // Copy the items to cache.
