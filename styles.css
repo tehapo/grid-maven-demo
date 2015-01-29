@@ -2,18 +2,18 @@
     width: 100% !important;
     height: 90% !important;
 }
-.v-grid img {
+.v-grid .clipboard img {
     height: 28px;
     width: 21px;
     opacity: 0.8;
     cursor: pointer;
     transition: all 100ms;
 }
-.v-grid img.zeroclipboard-is-hover {
+.v-grid .clipboard img.zeroclipboard-is-hover {
     opacity: 1;
     transform: scale(1.2) rotate(4deg);
 }
-.v-grid img.zeroclipboard-is-active {
+.v-grid .clipboard img.zeroclipboard-is-active {
     opacity: 1;
     transform: scale(0.8) rotate(-4deg);
 }
@@ -41,6 +41,11 @@
 .v-textfield {
     width: 100% !important;
     margin-bottom: 10px !important;
+}
+.favicon {
+    width: 16px;
+    height: 16px;
+    margin-right: 10px;
 }
 #status {
     position: absolute;

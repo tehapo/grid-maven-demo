@@ -21,6 +21,33 @@ window.addEventListener("load", function() {
 
     var renderers = {
 
+        faviconFallback: 'https://vaadin.com/vaadin-download-portlet/icons/jar.png',
+        blacklist: [],
+
+        groupId: function(element, x, data) {
+            var domain = data.groupId.split(".");
+            if (domain.length >= 2) {
+                domain = domain.reverse().splice(-2);
+                domain = domain[0] + '.' + domain[1];
+            } else {
+                domain = null;
+            }
+
+            $(element).html("");
+            if (domain !== null) {
+                if (renderers.blacklist.indexOf(domain) === -1) {
+                    $(element).append('<img src="http://' + domain + '/favicon.ico" class="favicon" />');
+                    $(element).find(".favicon").error(function() {
+                        this.src = renderers.faviconFallback;
+                        renderers.blacklist.push(domain);
+                    });
+                } else {
+                    $(element).append('<img src="' + renderers.faviconFallback + '" class="favicon" />');
+                }
+            }
+            $(element).append(data.groupId);
+        },
+
         updated: function(element, x, data) {
             if (new Date().getTime() - data.updated < 1000 * 60 * 60 * 24 * 30) {
                 $(element).addClass("new");
@@ -81,6 +108,7 @@ window.addEventListener("load", function() {
         rowCache = [];  // Empty cache.
         var grid = document.getElementById('grid');
         grid.rowCount = response.numFound;
+        grid.columns[0].renderer = renderers.groupId;
         grid.columns[3].renderer = renderers.updated;
         grid.columns[4].renderer = renderers.clipboard;
         grid.columns[5].renderer = renderers.javadoc;
