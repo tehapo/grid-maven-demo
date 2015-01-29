@@ -35,8 +35,7 @@
     height: 1.2em;
     line-height: 1.1em;
 }
-.v-grid td:last-child,
-.v-grid th:last-child {
+.v-grid td.clipboard {
     text-align: center;
 }
 .v-textfield {

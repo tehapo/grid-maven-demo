@@ -19,29 +19,22 @@ window.addEventListener("load", function() {
         return pom;
     }
 
-    // Keyup -> input value -> throttle -> url -> JSON request -> response.
-    var searchInit = Rx.Observable
-    .fromEvent(document.getElementById('search'), 'keyup')
-    .map(function(e) { return e.target.value; })
-    .filter(function(val) { return val.length > 1; })
-    .throttleWithTimeout(500)
-    .map(function(s) { return getUrl(s, 0, 0); })
-    .flatMap(function(url) {
-        return Rx.Observable.fromPromise($.getJSON(url));
-    })
-    .map(function(responseObj) {
-        return responseObj.response;
-    });
+    var renderers = {
 
-    // Update data source when new search initialized.
-    searchInit.subscribe(function(response) {
-        rowCache = [];  // Empty cache.
-        var grid = document.getElementById('grid');
-        grid.rowCount = response.numFound;
-        grid.columns[4].renderer = function(element, x, data) {
+        updated: function(element, x, data) {
+            if (new Date().getTime() - data.updated < 1000 * 60 * 60 * 24 * 30) {
+                $(element).addClass("new");
+            } else {
+                $(element).removeClass("new");
+            }
+            element.innerHTML = new Date(data.updated).toLocaleDateString();
+        },
+
+        clipboard: function(element, x, data) {
+            $(element).addClass('clipboard');
             element.innerHTML = '<img src="img/clipboard.png" title="Copy to clipboard" data-clipboard-text="' + getPomText(data) + '" />';
 
-            // Hook ZeroClipboard to
+            // Hook ZeroClipboard.
             var img = element.querySelector('img');
             zeroClipboard.clip(img);
             zeroClipboard.on('copy', function(event) {
@@ -50,15 +43,37 @@ window.addEventListener("load", function() {
                     $('#status').removeClass('display');
                 }, 2000);
             });
-        };
-        grid.columns[3].renderer = function(element, x, data) {
-            if (new Date().getTime() - data.updated < 1000 * 60 * 60 * 24 * 30) {
-                $(element).addClass("new");
-            } else {
-                $(element).removeClass("new");
-            }
-            element.innerHTML = new Date(data.updated).toLocaleDateString();
-        };
+        }
+
+    };
+
+    // Keyup -> input value -> throttle -> url -> JSON request -> response.
+    var searchInit = Rx.Observable
+            .fromEvent(document.getElementById('search'), 'keyup')
+            .map(function(e) {
+                return e.target.value;
+            })
+            .filter(function(val) {
+                return val.length > 1;
+            })
+            .throttleWithTimeout(500)
+            .map(function(s) {
+                return getUrl(s, 0, 0);
+            })
+            .flatMap(function(url) {
+                return Rx.Observable.fromPromise($.getJSON(url));
+            })
+            .map(function(responseObj) {
+                return responseObj.response;
+            });
+
+    // Update data source when new search initialized.
+    searchInit.subscribe(function(response) {
+        rowCache = [];  // Empty cache.
+        var grid = document.getElementById('grid');
+        grid.rowCount = response.numFound;
+        grid.columns[4].renderer = renderers.clipboard;
+        grid.columns[3].renderer = renderers.updated;
         grid.dataSource = function(index, count, callback) {
             $.getJSON(getUrl($("#search").val(), index, count), function(data) {
                 // Map the items to data needed for the grid.
@@ -84,10 +99,16 @@ window.addEventListener("load", function() {
     // Wire up selection.
     // TODO remove if not needed.
     var selection = Rx.Observable
-    .fromEvent(document.getElementById('grid'), 'select')
-    .map(function(e) { return e.target.selectedRow; })
-    .filter(function(rowIndex) { return rowIndex >= 0; })
-    .map(function(rowIndex) { return rowCache[rowIndex]; });
+            .fromEvent(document.getElementById('grid'), 'select')
+            .map(function(e) {
+                return e.target.selectedRow;
+            })
+            .filter(function(rowIndex) {
+                return rowIndex >= 0;
+            })
+            .map(function(rowIndex) {
+                return rowCache[rowIndex];
+            });
 
     // Focus the search field.
     document.getElementById('search').focus();
