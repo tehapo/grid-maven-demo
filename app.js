@@ -22,7 +22,7 @@ window.addEventListener("load", function() {
     var renderers = {
 
         faviconFallback: 'https://vaadin.com/vaadin-download-portlet/icons/jar.png',
-        blacklist: [],
+        faviconBlacklist: [],
 
         groupId: function(element, x, data) {
             var domain = data.groupId.split(".");
@@ -33,13 +33,14 @@ window.addEventListener("load", function() {
                 domain = null;
             }
 
+            console.log(renderers.faviconBlacklist);
             $(element).html("");
             if (domain !== null) {
-                if (renderers.blacklist.indexOf(domain) === -1) {
+                if (renderers.faviconBlacklist.indexOf(domain) === -1) {
                     $(element).append('<img src="http://' + domain + '/favicon.ico" class="favicon" />');
                     $(element).find(".favicon").error(function() {
                         this.src = renderers.faviconFallback;
-                        renderers.blacklist.push(domain);
+                        renderers.faviconBlacklist.push(domain);
                     });
                 } else {
                     $(element).append('<img src="' + renderers.faviconFallback + '" class="favicon" />');
