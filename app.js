@@ -33,18 +33,15 @@ window.addEventListener("load", function() {
                 domain = null;
             }
 
-            console.log(renderers.faviconBlacklist);
             $(element).html("");
-            if (domain !== null) {
-                if (renderers.faviconBlacklist.indexOf(domain) === -1) {
-                    $(element).append('<img src="http://' + domain + '/favicon.ico" class="favicon" />');
-                    $(element).find(".favicon").error(function() {
-                        this.src = renderers.faviconFallback;
-                        renderers.faviconBlacklist.push(domain);
-                    });
-                } else {
-                    $(element).append('<img src="' + renderers.faviconFallback + '" class="favicon" />');
-                }
+            if (domain !== null && renderers.faviconBlacklist.indexOf(domain) === -1) {
+                $(element).append('<img src="http://' + domain + '/favicon.ico" class="favicon" />');
+                $(element).find(".favicon").error(function() {
+                    this.src = renderers.faviconFallback;
+                    renderers.faviconBlacklist.push(domain);
+                });
+            } else {
+                $(element).append('<img src="' + renderers.faviconFallback + '" class="favicon" />');
             }
             $(element).append(data.groupId);
         },
